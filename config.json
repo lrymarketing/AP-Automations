@@ -1,0 +1,138 @@
+{
+    "max_browsers": 550,
+    "number_proxy_groups": 10,
+    "service_account": {
+        "type": "service_account",
+        "project_id": "project id",
+        "private_key_id": "your_private_key_id",
+        "private_key": "-----BEGIN PRIVATE KEY-----\n\n-----END PRIVATE KEY-----\n",
+        "client_email": "api-email-s.iam.gserviceaccount.com",
+        "client_id": "client id",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": "client cert url",
+        "universe_domain": "googleapis.com"
+    },
+	"adspower_api": {
+        "port": 50325
+    },
+    "google_sheets": {
+        "spreadsheets": [
+            {
+                "name_id": "sheet id",
+                "name_sheet_names": ["sheet name"]
+            }
+        ]
+    },
+	"default_profile_settings": {
+    "os": "Windows",
+    "browser": "SunBrowser"
+	},
+	"schedule": {
+		"start_time": "01:00",
+		"runs_per_day": 1
+	},
+    "proxy_groups": {
+		"Group Name 1": {
+			"proxy_soft": "other",
+            "proxy_type": "socks5",
+            "proxy_host": "your public ip",
+            "proxy_port": "port",
+            "proxy_user": "user",
+            "proxy_password": "pass",
+			"ip_checker": "ip-api",
+			"proxy_url": "rotational url"
+		},
+		"Group Name 2": {
+			"proxy_soft": "other",
+            "proxy_type": "socks5",
+            "proxy_host": "your public ip",
+            "proxy_port": "port",
+            "proxy_user": "user",
+            "proxy_password": "pass",
+			"ip_checker": "ip-api",
+			"proxy_url": "rotational url"
+		},
+		"Group Name 3": {
+			"proxy_soft": "other",
+            "proxy_type": "socks5",
+            "proxy_host": "your public ip",
+            "proxy_port": "port",
+            "proxy_user": "user",
+            "proxy_password": "pass",
+			"ip_checker": "ip-api",
+			"proxy_url": "rotational url"
+		},
+		"Group Name 4": {
+			"proxy_soft": "other",
+            "proxy_type": "socks5",
+            "proxy_host": "your public ip",
+            "proxy_port": "port",
+            "proxy_user": "user",
+            "proxy_password": "pass",
+			"ip_checker": "ip-api",
+			"proxy_url": "rotational url"
+		},
+		"Group Name 5": {
+			"proxy_soft": "other",
+            "proxy_type": "socks5",
+            "proxy_host": "your public ip",
+            "proxy_port": "port",
+            "proxy_user": "user",
+            "proxy_password": "pass",
+			"ip_checker": "ip-api",
+			"proxy_url": "rotational url"
+		},
+		"Group Name 11": {
+			"proxy_soft": "other",
+            "proxy_type": "socks5",
+            "proxy_host": "your public ip",
+            "proxy_port": "port",
+            "proxy_user": "user",
+            "proxy_password": "pass",
+			"ip_checker": "ip-api",
+			"proxy_url": "rotational url"
+		},
+		"Group Name 12": {
+			"proxy_soft": "other",
+            "proxy_type": "socks5",
+            "proxy_host": "your public ip",
+            "proxy_port": "port",
+            "proxy_user": "user",
+            "proxy_password": "pass",
+			"ip_checker": "ip-api",
+			"proxy_url": "rotational url"
+		},
+		"Group Name 13": {
+			"proxy_soft": "other",
+            "proxy_type": "socks5",
+            "proxy_host": "your public ip",
+            "proxy_port": "port",
+            "proxy_user": "user",
+            "proxy_password": "pass",
+			"ip_checker": "ip-api",
+			"proxy_url": "rotational url"
+		},
+		"Group Name 14": {
+			"proxy_soft": "other",
+            "proxy_type": "socks5",
+            "proxy_host": "your public ip",
+            "proxy_port": "port",
+            "proxy_user": "user",
+            "proxy_password": "pass",
+			"ip_checker": "ip-api",
+			"proxy_url": "rotational url"
+		},
+		"Group Name 15": {
+			"proxy_soft": "other",
+            "proxy_type": "socks5",
+            "proxy_host": "your public ip",
+            "proxy_port": "port",
+            "proxy_user": "user",
+            "proxy_password": "pass",
+			"ip_checker": "ip-api",
+			"proxy_url": "rotational url"
+		}
+	}
+}
