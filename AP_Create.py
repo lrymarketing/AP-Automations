@@ -112,7 +112,7 @@ def generate_profile_names(male_names, female_names, last_names, count):
     return profiles
 
 # Create AdsPower profile
-def create_ads_power_profile(profile_name, group_name, api_port, config):
+def create_ads_power_profile(profile_name, group_name, api_port, config, country_code):
     print(f"Creating AdsPower profile: {profile_name}, group: {group_name}")
     group_id = get_group_id(group_name, api_port)  # Fetch the group_id
     if group_id is None:
@@ -127,7 +127,8 @@ def create_ads_power_profile(profile_name, group_name, api_port, config):
         'group_id': group_id,  # Include group_id in the request
         'user_proxy_config': proxy_config,
         'os': config['default_profile_settings']['os'],
-        'browser': config['default_profile_settings']['browser']
+        'browser': config['default_profile_settings']['browser'],
+        'country': country_code
     }
     print("Profile data being sent:", profile_data)
     response = requests.post(create_url, json=profile_data)
@@ -234,11 +235,13 @@ def run_main_tasks(config):
     # Create profiles for each group based on needed profiles
     for group_name in config['proxy_groups']:
         num_profiles_to_create = needed_profiles.get(group_name, 0)
+        country_code = config['proxy_groups'][group_name].get('country_code', 'default_country_code')
         for _ in range(num_profiles_to_create):
             if not profile_names:
                 break
             profile_name = profile_names.pop(0)
-            create_ads_power_profile(profile_name, group_name, adspower_api_port, config)
+            # Pass the country_code parameter
+            create_ads_power_profile(profile_name, group_name, adspower_api_port, config, country_code)
             time.sleep(1)  # Sleep for 1 second between API requests
 
 def main():
