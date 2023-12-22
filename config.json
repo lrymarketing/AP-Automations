@@ -35,104 +35,114 @@
 	},
     "proxy_groups": {
 		"Group Name 1": {
-			"proxy_soft": "other",
+		"country_code":"code case sensitive",
+		"proxy_soft": "other",
             "proxy_type": "socks5",
             "proxy_host": "your public ip",
             "proxy_port": "port",
             "proxy_user": "user",
             "proxy_password": "pass",
-			"ip_checker": "ip-api",
-			"proxy_url": "rotational url"
+		"ip_checker": "ip-api",
+		"proxy_url": "rotational url"
 		},
 		"Group Name 2": {
-			"proxy_soft": "other",
+		"country_code":"code case sensitive",
+		"proxy_soft": "other",
             "proxy_type": "socks5",
             "proxy_host": "your public ip",
             "proxy_port": "port",
             "proxy_user": "user",
             "proxy_password": "pass",
-			"ip_checker": "ip-api",
-			"proxy_url": "rotational url"
+		"ip_checker": "ip-api",
+		"proxy_url": "rotational url"
 		},
 		"Group Name 3": {
-			"proxy_soft": "other",
+		"country_code":"code case sensitive",
+		"proxy_soft": "other",
             "proxy_type": "socks5",
             "proxy_host": "your public ip",
             "proxy_port": "port",
             "proxy_user": "user",
             "proxy_password": "pass",
-			"ip_checker": "ip-api",
-			"proxy_url": "rotational url"
+		"ip_checker": "ip-api",
+		"proxy_url": "rotational url"
 		},
 		"Group Name 4": {
-			"proxy_soft": "other",
+		"country_code":"code case sensitive",
+		"proxy_soft": "other",
             "proxy_type": "socks5",
             "proxy_host": "your public ip",
             "proxy_port": "port",
             "proxy_user": "user",
             "proxy_password": "pass",
-			"ip_checker": "ip-api",
-			"proxy_url": "rotational url"
+		"ip_checker": "ip-api",
+		"proxy_url": "rotational url"
 		},
 		"Group Name 5": {
-			"proxy_soft": "other",
+		"country_code":"code case sensitive",
+		"proxy_soft": "other",
             "proxy_type": "socks5",
             "proxy_host": "your public ip",
             "proxy_port": "port",
             "proxy_user": "user",
             "proxy_password": "pass",
-			"ip_checker": "ip-api",
-			"proxy_url": "rotational url"
+		"ip_checker": "ip-api",
+		"proxy_url": "rotational url"
 		},
 		"Group Name 11": {
-			"proxy_soft": "other",
+		"country_code":"code case sensitive",
+		"proxy_soft": "other",
             "proxy_type": "socks5",
             "proxy_host": "your public ip",
             "proxy_port": "port",
             "proxy_user": "user",
             "proxy_password": "pass",
-			"ip_checker": "ip-api",
-			"proxy_url": "rotational url"
+		"ip_checker": "ip-api",
+		"proxy_url": "rotational url"
 		},
 		"Group Name 12": {
-			"proxy_soft": "other",
+		"country_code":"code case sensitive",
+		"proxy_soft": "other",
             "proxy_type": "socks5",
             "proxy_host": "your public ip",
             "proxy_port": "port",
             "proxy_user": "user",
             "proxy_password": "pass",
-			"ip_checker": "ip-api",
-			"proxy_url": "rotational url"
+		"ip_checker": "ip-api",
+		"proxy_url": "rotational url"
 		},
 		"Group Name 13": {
-			"proxy_soft": "other",
+		"country_code":"code case sensitive",
+		"proxy_soft": "other",
             "proxy_type": "socks5",
             "proxy_host": "your public ip",
             "proxy_port": "port",
             "proxy_user": "user",
             "proxy_password": "pass",
-			"ip_checker": "ip-api",
-			"proxy_url": "rotational url"
+		"ip_checker": "ip-api",
+		"proxy_url": "rotational url"
 		},
 		"Group Name 14": {
-			"proxy_soft": "other",
+		"country_code":"code case sensitive",
+		"proxy_soft": "other",
             "proxy_type": "socks5",
             "proxy_host": "your public ip",
             "proxy_port": "port",
             "proxy_user": "user",
             "proxy_password": "pass",
-			"ip_checker": "ip-api",
-			"proxy_url": "rotational url"
+		"ip_checker": "ip-api",
+		"proxy_url": "rotational url"
 		},
 		"Group Name 15": {
-			"proxy_soft": "other",
+		"country_code":"code case sensitive",
+		"proxy_soft": "other",
             "proxy_type": "socks5",
             "proxy_host": "your public ip",
             "proxy_port": "port",
             "proxy_user": "user",
             "proxy_password": "pass",
-			"ip_checker": "ip-api",
-			"proxy_url": "rotational url"
+		"ip_checker": "ip-api",
+		"proxy_url": "rotational url"
 		}
 	}
 }
