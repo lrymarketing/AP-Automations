@@ -1,8 +1,8 @@
 # AP Create
 
 ## Country Codes
- ad: 'Andorra'
- ae: 'United Arab Emirates'
+ ad: 'Andorra'\n
+ ae: 'United Arab Emirates'\n
  af: 'Afghanistan'
  ag: 'Antigua & Barbuda'
  ai: 'Anguilla'
