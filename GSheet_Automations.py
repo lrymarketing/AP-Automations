@@ -15,7 +15,8 @@ class GoogleSheetsUpdater:
     def __init__(self, config):
         self.config = config
         self.setup_google_sheets()
-        self.geolocator = Nominatim(user_agent="levai@lrymarketing.com.au")
+        user_agent_email = self.config.get('geolocation', {}).get('user_agent_email', 'default_email@example.com')
+        self.geolocator = Nominatim(user_agent=user_agent_email)
 
     def setup_google_sheets(self):
         credentials = Credentials.from_service_account_info(
