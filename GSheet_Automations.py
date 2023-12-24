@@ -9,6 +9,25 @@ import json
 import requests
 from datetime import datetime, timedelta
 
+def make_request_with_retries(url, method='get', headers=None, params=None, json_body=None, max_retries=3, timeout=10):
+    for attempt in range(max_retries):
+        try:
+            if method.lower() == 'get':
+                response = requests.get(url, headers=headers, params=params, timeout=timeout)
+                time.sleep(1)
+            elif method.lower() == 'post':
+                response = requests.post(url, headers=headers, json=json_body, timeout=timeout)
+                time.sleep(1)
+            else:
+                raise ValueError("Unsupported HTTP method")
+
+            response.raise_for_status()
+            return response
+        except requests.exceptions.RequestException as e:
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)  # Exponential backoff
+            else:
+                raise e
 
 ### Google Sheet Remark Updater
 class GoogleSheetsUpdater:
@@ -48,21 +67,20 @@ class GoogleSheetsUpdater:
             sheet_info = self.service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
             total_rows = sheet_info['sheets'][0]['properties']['gridProperties']['rowCount']
 
-            empty_row_count = 0
+            MAX_EMPTY_ROWS = 3  # Max number of consecutive empty rows allowed
 
             for i in range(4, total_rows + 1):
                 try:
-                    print(f"Processing row {i} in sheet '{sheet_name}'")
                     range_name = f'{sheet_name}!A{i}:AA{i}'
                     time.sleep(1)
                     row_values = self.service.spreadsheets().values().get(
                         spreadsheetId=spreadsheet_id, range=range_name).execute().get('values', [[]])[0]
-                    print(f"Row {i} data: {row_values}")
 
-                    if not row_values[14].strip():
+                    if not row_values or all(not cell for cell in row_values):
+                        # Row is empty, increment counter and possibly skip to next sheet
                         empty_row_count += 1
-                        if empty_row_count >= 5:
-                            print(f"Encountered 5 empty rows in a row in sheet '{sheet_name}', moving to next sheet.")
+                        if empty_row_count >= MAX_EMPTY_ROWS:
+                            print(f"Encountered {MAX_EMPTY_ROWS} empty rows in a row in sheet '{sheet_name}', moving to next sheet.")
                             break
                         continue
                     else:
@@ -185,18 +203,16 @@ class GSheetLastOpen:
         headers = {'Authorization': self.config['adspower']['api_key']}
         params = {"group_name": group_name}
         try:
-            response = requests.get(f"{api_base_url}api/v1/group/list", params=params, headers=headers)
-            if response.status_code == 200:
-                data = response.json()
-                if data["code"] == 0:
-                    return next((group["group_id"] for group in data["data"]["list"] if group["group_name"].lower() == group_name.lower()), None)
-                else:
-                    print(f"Error retrieving group ID: {data['msg']}")
-            else:
-                print(f"HTTP Error {response.status_code} while retrieving group ID")
+            response = make_request_with_retries(f"{api_base_url}api/v1/group/list", method='get', headers=headers, params=params)
+            data = response.json()
             time.sleep(1)
-        except requests.exceptions.RequestException as e:
+            if data["code"] == 0:
+                return next((group["group_id"] for group in data["data"]["list"] if group["group_name"].lower() == group_name.lower()), None)
+            else:
+                print(f"Error retrieving group ID: {data['msg']}")
+        except Exception as e:
             print(f"Request failed: {e}")
+        time.sleep(1)
 
     def get_user_ids_by_group(self, group_id):
         api_base_url = f"http://{self.config['adspower']['host']}:{self.config['adspower']['port']}/"
@@ -245,6 +261,7 @@ class GSheetLastOpen:
         
         try:
             response = requests.get(api_base_url + 'api/v1/user/list', params, headers=headers)
+            time.sleep(1)
             if response.status_code == 200:
                 data = response.json()
                 if 'data' in data and 'list' in data['data']:
@@ -326,6 +343,15 @@ class GSheetLastOpen:
 
         print(f"Completed processing group {group_id}")
 
+    def get_all_valid_user_ids(self):
+        user_ids = []
+        for group_name in self.config['groups']:
+            group_id = self.get_group_id(group_name)
+            if group_id:
+                user_ids.extend(self.get_user_ids_by_group(group_id))
+            time.sleep(1)
+        return list(set(user_ids))  # Removing duplicates if any
+
     def format_last_open_time(timestamp):
         if not timestamp or timestamp == "0":
             return "Never Opened"
@@ -381,7 +407,95 @@ class GSheetLastOpen:
             self.update_sheet(user_id, group_name, remark, last_open_time, output_sheets)
 
  ###########   
-    
+
+class DuplicateAndInvalidDataCleaner:
+    def __init__(self, service, spreadsheet_id, sheet_name, user_ids):
+        self.service = service
+        self.spreadsheet_id = spreadsheet_id
+        self.sheet_name = sheet_name
+        self.valid_user_ids = user_ids
+
+    def fetch_all_rows(self):
+        range_name = f'{self.sheet_name}!A2:B'  # Fetching data from A2 and B2 onwards
+        result = self.service.spreadsheets().values().get(
+            spreadsheetId=self.spreadsheet_id, range=range_name).execute()
+        time.sleep(1)  # 1-second delay added here
+        rows = result.get('values', [])
+        return rows
+
+    def delete_row(self, row_index):
+        request = {
+            "requests": [
+                {
+                    "deleteDimension": {
+                        "range": {
+                            "sheetId": self.get_sheet_id(),
+                            "dimension": "ROWS",
+                            "startIndex": row_index,
+                            "endIndex": row_index + 1
+                        }
+                    }
+                }
+            ]
+        }
+        try:
+            self.service.spreadsheets().batchUpdate(
+                spreadsheetId=self.spreadsheet_id, body=request).execute()
+            print(f"Deleted row at index {row_index} in the sheet '{self.sheet_name}'.")  # Print statement
+            time.sleep(1)
+        except Exception as e:
+            print(f"Failed to delete row {row_index}: {e}")
+
+    def get_sheet_id(self):
+        # Fetch the sheet ID using the sheet name
+        sheet_metadata = self.service.spreadsheets().get(
+            spreadsheetId=self.spreadsheet_id).execute()
+        sheets = sheet_metadata.get('sheets', '')
+        sheet_id = next((sheet['properties']['sheetId'] for sheet in sheets if sheet['properties']['title'] == self.sheet_name), None)
+        return sheet_id
+
+    def delete_rows(self, rows_to_delete):
+        if not rows_to_delete:
+            return
+
+        # Sort the row indices in descending order
+        rows_to_delete.sort(reverse=True)
+
+        requests = []
+        for row_index in rows_to_delete:
+            requests.append({
+                "deleteDimension": {
+                    "range": {
+                        "sheetId": self.get_sheet_id(),
+                        "dimension": "ROWS",
+                        "startIndex": row_index - 1,  # Convert to zero-based index
+                        "endIndex": row_index
+                    }
+                }
+            })
+
+        # Send all delete requests in a single batchUpdate call
+        if requests:
+            self.service.spreadsheets().batchUpdate(
+                spreadsheetId=self.spreadsheet_id, 
+                body={"requests": requests}
+            ).execute()
+            print(f"Deleted {len(rows_to_delete)} rows from the sheet '{self.sheet_name}'.")
+
+    def clean_sheet(self):
+        rows = self.fetch_all_rows()
+        rows_to_delete = []
+
+        user_ids_encountered = set()
+        for index, row in enumerate(rows):
+            user_id = row[0] if len(row) > 0 else None
+            if user_id in user_ids_encountered or user_id not in self.valid_user_ids:
+                rows_to_delete.append(index + 2)  # Adding 2 because sheet rows are 1-indexed and headers are in the first row
+            else:
+                user_ids_encountered.add(user_id)
+
+        self.delete_rows(rows_to_delete)   
+
 def calculate_next_run_time(config):
     start_time = datetime.strptime(config['schedule']['start_time'], "%H:%M")
     now = datetime.now()
@@ -422,6 +536,23 @@ if __name__ == "__main__":
         gsheet_last_open.run(output_sheet)
     print("GSheetLastOpen processing completed for all output sheets.")
 
+    gsheet_last_open = GSheetLastOpen(config)
+    valid_user_ids = gsheet_last_open.get_all_valid_user_ids()
+
+    # Loop over each output_sheet and clean it
+    for output_sheet in config['google_sheets']['spreadsheets'][0]['output_sheets']:
+        print(f"Cleaning output sheet: {output_sheet}")
+        # Create an instance of DuplicateAndInvalidDataCleaner for each output_sheet
+        data_cleaner = DuplicateAndInvalidDataCleaner(
+            service=google_sheets_updater.service,
+            spreadsheet_id=config['google_sheets']['spreadsheets'][0]['id'],
+            sheet_name=output_sheet,
+            user_ids=valid_user_ids
+        )
+        # Run the cleaner for the current output_sheet
+        data_cleaner.clean_sheet()
+    print("Cleaning process completed for all output sheets.")
+
     # Start the scheduling loop
     print("Entering scheduling loop...")
     while True:
@@ -442,4 +573,15 @@ if __name__ == "__main__":
         google_sheets_updater.run()
         for output_sheet in config['google_sheets']['spreadsheets'][0]['output_sheets']:
             gsheet_last_open.run(output_sheet)
+
+            # Clean each output sheet
+            print(f"Cleaning output sheet: {output_sheet}")
+            valid_user_ids = gsheet_last_open.get_all_valid_user_ids()  # Assuming this method is defined
+            data_cleaner = DuplicateAndInvalidDataCleaner(
+                service=google_sheets_updater.service,
+                spreadsheet_id=config['google_sheets']['spreadsheets'][0]['id'],
+                sheet_name=output_sheet,
+                user_ids=valid_user_ids
+            )
+            data_cleaner.clean_sheet()
         print("Scheduled run completed. Re-entering sleep until next schedule.")
