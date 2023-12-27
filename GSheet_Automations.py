@@ -35,6 +35,7 @@ class GoogleSheetsUpdater:
         self.config = config
         self.setup_google_sheets()
         user_agent_email = self.config.get('geolocation', {}).get('user_agent_email', 'default_email@example.com')
+        self.geocoding_api_key = self.config.get('geolocation', {}).get('api_key', '')
         self.geolocator = Nominatim(user_agent=user_agent_email)
 
     def setup_google_sheets(self):
@@ -87,6 +88,9 @@ class GoogleSheetsUpdater:
                         empty_row_count = 0
 
                     username = row_values[0] if len(row_values) > 0 else None # Column A
+                    # Check if @gmail.com is not in the username and append it if necessary
+                    if username and '@gmail.com' not in username.lower():
+                        username += '@gmail.com'
                     password = row_values[1] if len(row_values) > 1 else None # Column B
                     address = row_values[3] if len(row_values) > 3 else None # Column D
                     fakey = row_values[7] if len(row_values) > 7 else None # Column H
@@ -97,7 +101,9 @@ class GoogleSheetsUpdater:
                         continue
 
                     if address.strip():  # Checks if there is an address
+                        print(f"Attempting geolocation for address: {address}")
                         lat, lon = self.attempt_geolocation(address)
+                        print(f"Geolocation results for {address}: Latitude: {lat}, Longitude: {lon}")
                         if lat is not None and lon is not None:
                             gmail_status += '\nLocation Added'
                         else:
@@ -126,8 +132,10 @@ class GoogleSheetsUpdater:
 
     def attempt_geolocation(self, address):
         try:
-            geocode_url = f"https://geocode.maps.co/search?q={address}"
+            geocode_url = f"https://geocode.maps.co/search?q={address}&api_key={self.geocoding_api_key}"
+            print(f"Geocoding URL: {geocode_url}")
             response = requests.get(geocode_url)
+            print(f"Geocoding response status: {response.status_code}, response body: {response.text}")
             if response.status_code == 200:
                 data = response.json()
                 if data and len(data) > 0:
@@ -136,6 +144,7 @@ class GoogleSheetsUpdater:
                     return lat, lon
         except Exception as e:
             print(f"Geocoding error: {e}")
+            print(f"Geocoding error for address '{address}': {e}")
         
         return None, None
 
