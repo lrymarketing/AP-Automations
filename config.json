@@ -13,7 +13,8 @@
         "universe_domain": "googleapis.com"
     },
 	"geolocation": {
-        "user_agent_email": "youremailhere"
+        "user_agent_email": "youremailhere",
+	"api_key": "API_KEY_HERE"
 	},
     "google_sheets": {
         "spreadsheets": [
