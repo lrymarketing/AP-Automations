@@ -112,6 +112,7 @@ class GoogleSheetsUpdater:
 
         for sheet_name in sheet_names:
             print(f"Starting to process sheet: {sheet_name}")
+            empty_row_count = 0
             
             # Get both row and column counts
             total_rows, total_columns = get_sheet_size(self.service, spreadsheet_id, sheet_name)
@@ -125,24 +126,27 @@ class GoogleSheetsUpdater:
             MAX_EMPTY_ROWS = 3  # Max number of consecutive empty rows allowed
             last_column_letter = chr(64 + total_columns)  # Converts column count to a letter (e.g., 26 to 'Z')
 
+            empty_row_count = 0
+
             for i in range(4, total_rows + 1):
                 try:
-                    # Updated range name to include dynamic column count
                     range_name = f'{sheet_name}!A{i}:{last_column_letter}{i}'
+                    response = self.service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=range_name).execute()
+                    row_values = response.get('values', [[]])[0] if response.get('values', []) else []
                     time.sleep(1)
-                    row_values = self.service.spreadsheets().values().get(
-                        spreadsheetId=spreadsheet_id, range=range_name).execute().get('values', [[]])[0]
-                    print(f"Row Values Type: {type(row_values)}, Data: {row_values}")  # Debugging print statement
-                    time.sleep(1)
-                    if not row_values or all(not cell for cell in row_values):
-                        # Row is empty, increment counter and possibly skip to next sheet
+
+                    # Check if row is empty or contains only whitespace in all cells
+                    if not row_values or (len(row_values) < 15 or not row_values[0].strip() and not row_values[1].strip() and not row_values[14].strip()):
                         empty_row_count += 1
-                        if empty_row_count >= MAX_EMPTY_ROWS:
-                            print(f"Encountered {MAX_EMPTY_ROWS} empty rows in a row in sheet '{sheet_name}', moving to next sheet.")
-                            break
-                        continue
+                        time.sleep(1)
+                        if empty_row_count >= 3:
+                            time.sleep(1)
+                            print("Encountered 3 empty rows in critical columns. Moving to the next section.")
+                            break  # Proceed to the next section
                     else:
-                        empty_row_count = 0
+                        empty_row_count = 0  # Reset count if the row is not empty
+
+                    print(f"Finished processing row {i}, empty_row_count: {empty_row_count}")
 
                     username = row_values[0] if len(row_values) > 0 else None # Column A
                     # Check if @gmail.com is not in the username and append it if necessary
